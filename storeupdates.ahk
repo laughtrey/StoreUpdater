@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 #include OCR.ahk
-#SingleInstance
+#SingleInstance Force
 
 updateMSStore() {
     ;; If Store is NOT open, open it and exit
@@ -20,8 +20,6 @@ updateMSStore() {
         MsgBox "OCR failed"
         return 50
     }
-
-
 
     ;; Find and click "Check for updates"
     foundCheck := false
@@ -87,6 +85,11 @@ getStoreUpdateLogsToFile() {
     return 0
 }
 
+;; Enable Windows Update Service
+RunWait(A_ComSpec " /c sc config wuauserv start= demand", , "Hide")
+RunWait(A_ComSpec " /c sc start wuauserv", , "Hide")
+
+
 ;; Initial launch
 Run "ms-windows-store://updates"
 Sleep 7000
@@ -103,5 +106,10 @@ result := getStoreUpdateLogsToFile()
 if (result = 50) {
     ExitApp 50
 }
+
+;; Disable Windows Update service
+RunWait(A_ComSpec " /c sc stop wuauserv", , "Hide")
+RunWait(A_ComSpec " /c sc config wuauserv start= disabled", , "Hide")
+
 
 ExitApp 0
